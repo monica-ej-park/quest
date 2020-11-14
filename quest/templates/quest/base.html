@@ -1,0 +1,148 @@
+{% load static %}
+<html>
+    <head>
+        <title>어린이 레벨업 퀘스트</title>
+<!--       <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+-->
+
+
+    </head>
+    <body>
+        <div class='title'>
+            <h1>어린이 레벨업 퀘스트</h1>
+        </div>
+        <nav>
+            <ul id='topMenu'>
+                    <li><a class="menuLink" href="/quest/record/김재윤/">김재윤</a></li>
+                    <li><a class="menuLink" href="/quest/record/김재형">김재형</a></li>
+                    <li><a class="menuLink" href="/quest/xpsheets">경험치표</a></li>                   
+                    <li><a class="menuLink" href="/quest/quests">퀘스트</a></li>
+                    <li><a class="menuLink" href="/builder/achievements">업적</a></li>
+            </ul>
+        </nav>
+
+        <div class="content container">
+            <div class="row">
+              <div class="col-md-8">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+
+
+
+        <style>
+            #topMenu {            
+                height: 30px; 
+                width: 850px;
+                text-align: center;   
+                margin: 0;
+                padding: 0;  
+            }
+            #topMenu li {                       
+                display:inline;
+                list-style: none;           
+                color: #ddddfd;              
+                background-color: #4758ba;  
+                float: left;                
+                line-height: 30px;          
+                vertical-align: middle;  
+            }
+            #topMenu .menuLink {    
+                display:inline-block;                          
+                text-decoration:none;
+                color: #ddddfd;                            
+                display: block;                           
+                width: 170px;                            
+                font-size: 12px;                         
+                font-weight: bold;
+                font-family: "Trebuchet MS", Dotum, Arial; 
+            }
+            #topMenu .menuLink:hover {         
+                color: white;                
+                background-color: #4758ca;
+            }
+
+            #tab {            
+                height: 30px; 
+                width: 850px;
+                text-align: center;   
+                margin: 0;
+                padding: 0;  
+            }
+
+            #tab li {                       
+                display:inline;
+                list-style: none;           
+                color: #6666a1;              
+                background-color: #f3f4fd;  
+                float: left;                
+                line-height: 30px;          
+                vertical-align: middle;  
+            }
+            #tab .menuLink {
+                display:inline-block;                          
+                text-decoration:none;
+                color: #3a3a66;                            
+                display: block;                           
+                width: 212px;                            
+                font-size: 12px;                         
+                font-weight: bold;
+                font-family: "Trebuchet MS", Dotum, Arial; 
+            }
+            #tab .menuLink:hover {         
+                color: white;                
+                background-color: #4758ca;
+            }
+            #tab .menuLink:active {
+                color: rgb(189, 50, 50);                
+                background-color: #060c31;
+            }
+            .tab_btn:target {
+                background: #45a1a1;
+            }
+            .tab_btn:target .table {
+                display: block;
+            }
+
+            .table {display: table; width: 850px;}
+            .header_row {display: table-header-group;}
+            .header_cell {
+                display: table-cell; 
+                padding: 3px; 
+                border-bottom: 1px solid #DDD; 
+                text-align: left; 
+                font-weight: bold;
+                width: 100/'{{ field_names|length }}'%; 
+            }
+            .header_edit_cell {
+                display: table-cell; 
+                padding: 3px; 
+                border-bottom: 1px solid #DDD; 
+                width: 6%; 
+            }    
+            .row {display: table-row-group;}
+            .cell {
+                display: table-cell; 
+                padding: 3px; 
+                border-bottom: 1px solid #DDD; 
+                overflow: scroll; 
+                width: 100/'{{ field_names|length }}'%;   
+            }
+            .edit_cell {
+                display: table-cell; 
+                padding: 3px; 
+                border-bottom: 1px solid #DDD; 
+                width: 6%; 
+            }
+            input,textarea, select, option {
+                width:850px;
+            }
+        </style>
+
+
+    </body>
+</html>
