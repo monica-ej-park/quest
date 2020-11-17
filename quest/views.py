@@ -4,6 +4,7 @@ from .forms import RecordForm
 from .models import Record, Action
 from datetime import date
 import datetime
+from django.db.models import F, Sum, Count, Case, When
 # Create your views here.
 
 def record(request, username, term):
@@ -20,69 +21,33 @@ def record(request, username, term):
     else:
         records = None        
         field_names = None
-        records = Record.objects.filter(user=user).order_by('-id')
-        total_xp = 0
-        for r in records:
-            r.action.category = r.action.category_type_choices[r.action.category][1]
-            total_xp += r.xp
-
+        xp_per_day = []
+        
+        total_xp = Record.objects.query_total_xp(user=user)
+ 
         actions = Action.objects.all()    
         if term == 'today':
-            records = Record.objects.filter(user=user, date=date.today()).order_by('-id')
+            #records = Record.objects.filter(user=user, date=date.today()).order_by('-id')
+            records = Record.objects.query_all(user=user)
+            #for record in records:
+            #    print(record['category'])
+                #record['category'] = Action.category_type_choices[record['category']][1]
+
             field_names = ["카테고리", "행동", "반복횟수", "경험치", '메모', '날짜', '시간']
-
         elif term == 'week':
-            records = Record.objects.filter(user=user, date__range=[date.today() - datetime.timedelta(days=6), date.today()]).order_by('-id')
-
-            # 일별 경험치 합
-            #for r in records:
-
-            # 액션별 경험치 합    
-            for a, i in zip(actions, range(0, len(actions))):
-                a.repeat = 0
-                a.xp = 0
-                a.category = a.category_type_choices[a.category][1]
-                for r in records:
-                    if a.name == r.action.name:
-                        a.repeat += r.repeat
-                        a.xp += r.xp
+            records = Record.objects.query_xp_per_action(user=user, days=6)
+            xp_per_day = Record.objects.query_xp_per_day(user=user, days=6)
             field_names = ["카테고리", "행동", "반복횟수", "경험치"]
-            records = actions
-                
         elif term == 'month':
-            records = Record.objects.filter(user=user, date__range=[date.today() - datetime.timedelta(days=29), date.today()]).order_by('-id')
-            
-            # 일별 경험치 합
-            #for r in records:
-
-            # 액션별 경험치 합             
-            for a, i in zip(actions, range(0, len(actions))):
-                a.repeat = 0
-                a.xp = 0
-                a.category = a.category_type_choices[a.category][1]
-                for r in records:
-                    if a.name == r.action.name:
-                        a.repeat += r.repeat
-                        a.xp += r.xp
+            records = Record.objects.query_xp_per_action(user=user, days=29)
+            xp_per_day = Record.objects.query_xp_per_day(user=user, days=29)
             field_names = ["카테고리", "행동", "반복횟수", "경험치"]
-            records = actions
         else:          
             term = 'total'
-            # 일별 경험치 합
-            #for r in records:
-
-            # 액션별 경험치 합 
-            for a, i in zip(actions, range(0, len(actions))):
-                a.repeat = 0
-                a.xp = 0
-                a.category = a.category_type_choices[a.category][1]
-                for r in records:
-                    if a.name == r.action.name:
-                        a.repeat += r.repeat
-                        a.xp += r.xp
+            records = Record.objects.query_xp_per_action(user=user, days=364)
+            xp_per_day = Record.objects.query_xp_per_day(user=user, days=364)
             field_names = ["카테고리", "행동", "반복횟수", "경험치"]
-            records = actions
-
+            
 
         form = RecordForm()
         form.fields['user'].initial = user
@@ -105,7 +70,7 @@ def record(request, username, term):
                     {'id':'total', 'name': "전체"}
                 ],
                 'selected_tab': term,
-                'xp_per_day': []               
+                'xp_per_day': xp_per_day               
             }
         )
 

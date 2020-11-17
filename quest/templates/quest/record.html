@@ -30,7 +30,8 @@
     <h4><b>{{ username }}</b> 기록 추가하기</h4>
     <form method="POST" class="builder-form">{% csrf_token %}
         {{ form.as_p }}    
-        <button type="submit" class="save btn btn-default">저장하기</button>
+       <!-- <button type="submit" class="save btn btn-default">저장하기</button> -->
+       <button type="submit" class="btn btn-outline-primary">저장하기</button>
     </form>
     </div>
 
@@ -39,13 +40,28 @@
         <H4>저장된 <b>{{ username }}</b> 기록 (현재 경험치: {{ total_xp }}xp)</H4>
     </div>
 
-    <nav>
-        <ul id='tab'>
-            {% for tab in record_tabs %}
-                <li id='{{ tab.id }}' class='tab_btn'><a class="menuLink" href="{% url 'record' username tab.id %}">{{ tab.name }}</a></li>
-            {% endfor %}  
-        </ul>
-    </nav>
+
+    <div class="btn-group btn-lg btn-block" role="group" aria-label="Basic example">
+        {% for tab in record_tabs %}
+            {% if selected_tab == tab.id %}
+                <button 
+                type="button" 
+                class="btn btn-secondary active" 
+                id='{{ tab.id }}' 
+                onclick=location.href="{% url 'record' username tab.id %}">
+
+            {% else %}
+                <button 
+                type="button" 
+                class="btn btn-secondary" 
+                id='{{ tab.id }}' 
+                onclick=location.href="{% url 'record' username tab.id %}">
+            {% endif %}
+ 
+            {{ tab.name }}
+        </button>
+        {% endfor %}  
+    </div>
 
 
     <div class="table">
@@ -59,7 +75,7 @@
           {% for data in data_list %}  
         <div class="row">     
             {% if selected_tab == 'today' %}              
-                <span class='cell' name='desc'> {{ data.action.category }}</span>
+                <span class='cell' name='desc'> {{ data.category }}</span>
                 <span class='cell' name='desc'> {{ data.action.name }}</span>
                 <span class='cell' name='desc'> {{ data.repeat }}</span>
                 <span class='cell' name='desc'> {{ data.xp }}</span>   
@@ -69,8 +85,8 @@
             {% else %}
                 <span class='cell' name='desc'> {{ data.category }}</span>
                 <span class='cell' name='desc'> {{ data.name }}</span>
-                <span class='cell' name='desc'> {{ data.repeat }}</span>
-                <span class='cell' name='desc'> {{ data.xp }}</span>  
+                <span class='cell' name='desc'> {{ data.total_repeat }}</span>
+                <span class='cell' name='desc'> {{ data.total_xp }}</span>
             {% endif %}
                  <!--<span class='edit_cell'><button name='edit_btn' class='edit_btn'>수정</button></span>-->        
         </div>
@@ -83,7 +99,6 @@
           <br/>
     {% if selected_tab != 'today' %}           
     <div>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
        
         <!-- 차트 링크 --> 
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script> 
@@ -99,8 +114,9 @@
     </div>          
     {% endif %}
 
-    
+
     <script type="text/javascript">
+
         var i = 0
         function calculate_xp() {
             var selectbox = document.forms[0].action
@@ -135,15 +151,24 @@
         }
 
 
+        "{% if selected_tab != 'today' %}"
         // 그래프 그리기
+        var red = 'rgba(255, 99, 132, 0.2)' // 소비
+        var blue = 'rgba(54, 162, 235, 0.2)' // 수입
+        var red_b = 'rgba(255, 99, 132, 1)'
+        var blue_b = 'rgba(54, 162, 235, 1)'
         var dates = [];
-        var today = new Date();
-        console.log(today)
-        console.log(today.getDate())
-        
-        for (var d = 0; d < 7; d++) {
-            dates.push(today.getMonth() + "/" + (today.getDate() - d))
-        }
+        var xps = [];
+        var bg_colors = [];
+        var border_colors = [];
+
+        "{% for data in xp_per_day %}"
+            dates.push('{{ data.date }}');
+            xps.push('{{ data.daily_total_xp }}');
+            bg_colors.push(blue);
+            border_colors.push(blue_b);
+        "{% endfor %}"
+
         var ctx = document.getElementById('myChart'); 
         var myChart = new Chart(
             ctx, 
@@ -154,9 +179,9 @@
                     datasets: [
                         { 
                             label: '# 경험치', 
-                            data: [12, 19, 3, 5, 2, 3], 
-                            backgroundColor: [ 'rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)' ], 
-                            borderColor: [ 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)' ], 
+                            data: xps, 
+                            backgroundColor: bg_colors, 
+                            borderColor: border_colors, 
                             borderWidth: 1 
                         }
                     ] 
@@ -168,7 +193,7 @@
                 } 
             }
         ); 
-
+        "{% endif %}"
 
 
     </script>
