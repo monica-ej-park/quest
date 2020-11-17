@@ -33,7 +33,11 @@ def record(request, username, term):
 
         elif term == 'week':
             records = Record.objects.filter(user=user, date__range=[date.today() - datetime.timedelta(days=6), date.today()]).order_by('-id')
-          
+
+            # 일별 경험치 합
+            #for r in records:
+
+            # 액션별 경험치 합    
             for a, i in zip(actions, range(0, len(actions))):
                 a.repeat = 0
                 a.xp = 0
@@ -47,6 +51,11 @@ def record(request, username, term):
                 
         elif term == 'month':
             records = Record.objects.filter(user=user, date__range=[date.today() - datetime.timedelta(days=29), date.today()]).order_by('-id')
+            
+            # 일별 경험치 합
+            #for r in records:
+
+            # 액션별 경험치 합             
             for a, i in zip(actions, range(0, len(actions))):
                 a.repeat = 0
                 a.xp = 0
@@ -59,6 +68,10 @@ def record(request, username, term):
             records = actions
         else:          
             term = 'total'
+            # 일별 경험치 합
+            #for r in records:
+
+            # 액션별 경험치 합 
             for a, i in zip(actions, range(0, len(actions))):
                 a.repeat = 0
                 a.xp = 0
@@ -91,7 +104,8 @@ def record(request, username, term):
                     {'id': 'month', 'name': "한달"}, 
                     {'id':'total', 'name': "전체"}
                 ],
-                'selected_tab': term               
+                'selected_tab': term,
+                'xp_per_day': []               
             }
         )
 
