@@ -95,3 +95,7 @@ def show_xpsheets(request):
         'quest/record.html', 
         {"page_name": 'xpsheets', 'data_list': data_list, 'field_names': ["카테고리", "행동", "경험치"]}
     )
+
+
+def quest(request):
+    pass

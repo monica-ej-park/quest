@@ -16,6 +16,8 @@ class Action(models.Model):
         (5, '게임'),
         (6, '유투브'),
         (7, '인터넷'),
+        (8, '기타'),
+        (9, '수업'),
     )
     category = models.IntegerField(default=0, choices=category_type_choices, verbose_name="카테고리")
     name = models.CharField(null=False, max_length=100, verbose_name="행동이름")
@@ -80,7 +82,7 @@ class RecordManager(models.Manager):
 class Record(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     action = models.ForeignKey(Action, on_delete=models.CASCADE, null=False)
-    memo = models.CharField(max_length=10, default="", blank=True, verbose_name="추가설명")
+    memo = models.CharField(max_length=60, default="", blank=True, verbose_name="추가설명")
     repeat = models.IntegerField(default=1, verbose_name="반복 횟수")
     xp = models.IntegerField(default=0, verbose_name="경험치")
     date = models.DateField(verbose_name="날짜", default=datetime.date.today, auto_created=True)
