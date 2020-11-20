@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 import datetime
 from datetime import date
-from django.db.models import F, Sum, Count, Case, When
+from django.db.models import F, Sum, Count, Case, When, Subquery
 
 
 class Action(models.Model):
@@ -18,6 +18,7 @@ class Action(models.Model):
         (7, '인터넷'),
         (8, '기타'),
         (9, '수업'),
+        (10, '퀘스트'),
     )
     category = models.IntegerField(default=0, choices=category_type_choices, verbose_name="카테고리")
     name = models.CharField(null=False, max_length=100, verbose_name="행동이름")
@@ -40,16 +41,18 @@ class RecordManager(models.Manager):
         return records
 
 
+    # 누적 총 xp
     def query_total_xp(self, user):
         return Record.objects.filter(
             user=user,
         ).aggregate(Sum('xp'))['xp__sum'] 
         
 
+    # 기간내 액션별 총 xp
     def query_xp_per_action(self, user, days):
         records = Record.objects.filter(
             user=user, 
-            date__range=[date.today() - datetime.timedelta(days=6), 
+            date__range=[date.today() - datetime.timedelta(days=days), 
             date.today()]
         ).values(
             'action'
@@ -64,19 +67,35 @@ class RecordManager(models.Manager):
         return records
         
 
+    # 기간별 총 xp
     def query_xp_per_day(self, user, days):
         return Record.objects.filter(
             user=user, 
-            date__range=[date.today() - datetime.timedelta(days=6), 
+            date__range=[date.today() - datetime.timedelta(days=days), 
+            date.today()]
+        ).exclude(
+            action__category=5
+        ).values(
+            'date'
+        ).annotate(
+            daily_earned_xp=Sum('xp')
+        )
+        
+
+    # 기간별 게임에 소비한 xp
+    def query_xp_for_game(self, user, days):
+        return Record.objects.filter(
+            user=user,
+            action__category=5, # 게임 == 5
+            date__range=[date.today() - datetime.timedelta(days=days), 
             date.today()]
         ).values(
             'date'
         ).annotate(
-            daily_total_xp=Sum('xp')
-        ).order_by(
-            '-date'
-        )
-    
+            daily_spent_xp=Sum('xp')
+        )#.order_by(
+        #    '-date'
+        #)
 
 
 class Record(models.Model):
@@ -90,7 +109,31 @@ class Record(models.Model):
 
     objects = RecordManager()
 
+"""
+경험치 펜딩/수락 상태 표시 필드 추가하기
+
+"""
 
 
 
 
+class Quest(models.Model):
+    category_type_choices = (
+        (0, '공부'),
+        (1, '문화/예술'),
+        (2, '운동'),
+        (3, '자기관리'),
+        (4, '집안일'),
+        (5, '게임'),
+        (6, '유투브'),
+        (7, '인터넷'),
+        (8, '기타'),
+        (9, '수업'),
+        (10, '퀘스트'),
+    )
+    category = models.IntegerField(default=0, choices=category_type_choices, verbose_name="카테고리")
+    name = models.CharField(null=False, max_length=100, verbose_name="퀘스트 이름")
+    desc = models.TextField(null=True, verbose_name="퀘스트 내용")
+    xp = models.IntegerField(default=0, verbose_name="경험치")    
+    to = models.ForeignKey(User, on_delete=models.CASCADE, null=False, verbose_name="수행자")
+    accomplishment = models.BooleanField(default=False, verbose_name="수행 여부")

@@ -2,29 +2,6 @@
 
 {% block content %}
 
-    {% if page_name == 'xpsheets' %}
-        <br/>
-        <h2>경험치 표</h2>
-        <br/>
-        <div class="table">
-            <div class='header_row'>
-            {% for field_name in field_names %}
-            <span class='header_cell'>
-                {{ field_name }}
-            </span>
-            {% endfor %}   
-            <span class='header_edit_cell'>
-            </span> 
-            </div>
-            {% for data in data_list %}  
-            <div class="row">            
-                <span class='cell' name='name'>{{ data.category }}</span>            
-                <span class='cell' name='desc'> {{ data.name}}</span>
-                <span class='cell' name='desc'> {{ data.xp }}</span>                
-            </div>
-            {% endfor %}
-        </div>
-    {% else %}
     <div class="form">
     <br/>
     <h4><b>{{ username }}</b> 기록 추가하기</h4>
@@ -99,7 +76,8 @@
           <br/>
     {% if selected_tab != 'today' %}           
     <div>
-       
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> 
+    
         <!-- 차트 링크 --> 
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script> 
         
@@ -108,9 +86,9 @@
         </div>
         
         <!-- 부트스트랩 --> 
-     <!--    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> 
+         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script> 
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script> -->
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script> 
     </div>          
     {% endif %}
 
@@ -153,21 +131,100 @@
 
         "{% if selected_tab != 'today' %}"
         // 그래프 그리기
-        var red = 'rgba(255, 99, 132, 0.2)' // 소비
-        var blue = 'rgba(54, 162, 235, 0.2)' // 수입
-        var red_b = 'rgba(255, 99, 132, 1)'
-        var blue_b = 'rgba(54, 162, 235, 1)'
-        var dates = [];
-        var xps = [];
-        var bg_colors = [];
-        var border_colors = [];
 
-        "{% for data in xp_per_day %}"
-            dates.push('{{ data.date }}');
-            xps.push('{{ data.daily_total_xp }}');
-            bg_colors.push(blue);
-            border_colors.push(blue_b);
-        "{% endfor %}"
+
+        function createDataset() 
+        {
+            const red = 'rgba(255, 99, 132, 0.2)'; // 소비
+            const blue = 'rgba(54, 162, 235, 0.2)'; // 수입
+            const red_b = 'rgba(255, 99, 132, 1)';
+            const blue_b = 'rgba(54, 162, 235, 1)';
+            var dates = [];
+            var earned_xps = [];
+            var spent_xps = [];
+            var earned_bg_colors = [];
+            var earned_border_colors = [];
+            var spent_bg_colors = [];
+            var spent_border_colors = [];
+
+            var days = 364;
+            "{% if selected_tab == 'week' %}"
+                days = 7;
+            "{% elif selected_tab == 'month' %}"
+                days = 29;
+            "{% endif %}"
+
+            let now = new Date();
+            console.log(now.getMonth());
+            console.log("now = " + now.getTime())
+            for (var i = 0; i < days; i++) {
+                var t = now.getTime() - ((i + 1) * 24 * 60 * 60 * 1000);
+                var d = new Date(t);
+                dates.unshift(d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate());
+            }
+
+            var earned = {}
+            "{% for e in earned_xp %}"
+                var earned_date = '{{ e.date|date:"yy/m/d" }}';
+                var xp = '{{ e.daily_earned_xp }}';
+                earned[earned_date] = xp;
+            "{% endfor %}"        
+            var earned_date_keys = Object.keys(earned);
+
+            var j = 0;
+            for (var i = 0; i < days && j <= earned_date_keys.length ; i++) {
+                if (earned_date_keys[j] == dates[i]) {
+                    earned_xps.push(earned[earned_date_keys[j]]);
+                    j += 1;
+                }
+                else {
+                    earned_xps.push(0);
+                }
+                earned_bg_colors.push(blue);
+                earned_border_colors.push(blue_b);
+            }
+
+            var spent = {}
+            "{% for s in spent_xp %}"
+                var spent_date = '{{ s.date|date:"yy/m/d" }}';
+                var xp = '{{ s.daily_spent_xp }}';
+                spent[spent_date] = xp;
+            "{% endfor %}"        
+            var spent_date_keys = Object.keys(spent);
+
+            j = 0
+            for (var i = 0; i < days && j <= spent_date_keys.length ; i++) {
+                if (spent_date_keys[j] == dates[i]) {
+                    spent_xps.push(Math.abs(spent[spent_date_keys[j]]));
+                    j += 1;
+                }
+                else {
+                    spent_xps.push(0);
+                }
+                spent_bg_colors.push(red);
+                spent_border_colors.push(red_b);
+            }
+
+            var dataset = {}
+            dataset['labels'] = dates;
+            dataset['datasets'] = [ 
+                {
+                    label: '# 경험치', 
+                    data: earned_xps, 
+                    backgroundColor: earned_bg_colors, 
+                    borderColor: earned_bg_colors, 
+                    borderWidth: 1 
+                },
+                {
+                    label: '# 게임', 
+                    data: spent_xps, 
+                    backgroundColor: spent_bg_colors, 
+                    borderColor: spent_border_colors, 
+                    borderWidth: 1 
+                }
+            ] 
+            return dataset;
+        }
 
         var type = "{{ selected_tab }}" === "week" ? 'bar': 'line';
         var ctx = document.getElementById('myChart'); 
@@ -175,18 +232,7 @@
             ctx, 
             {
                 type: type, 
-                data: { 
-                    labels: dates,//['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], 
-                    datasets: [
-                        { 
-                            label: '# 경험치', 
-                            data: xps, 
-                            backgroundColor: bg_colors, 
-                            borderColor: border_colors, 
-                            borderWidth: 1 
-                        }
-                    ] 
-                }, 
+                data: createDataset(),
                 options: { 
                     scales: { 
                         yAxes: [{ ticks: { beginAtZero: true } }] 
@@ -198,11 +244,7 @@
 
 
     </script>
-    {% endif %}
 
 
 {% endblock content %}
 
-{% block graph %}
-{% endblock graph %}
-    

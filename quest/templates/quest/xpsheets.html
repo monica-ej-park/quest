@@ -1,0 +1,25 @@
+{% extends 'quest/base.html' %}
+
+{% block content %}
+    <br/>
+    <h2>경험치 표</h2>
+    <br/>
+    <div class="table">
+        <div class='header_row'>
+        {% for field_name in field_names %}
+        <span class='header_cell'>
+            {{ field_name }}
+        </span>
+        {% endfor %}   
+        </div>
+        {% for data in data_list %}  
+        <div class="row">            
+            <span class='cell' name='category'>{{ data.category }}</span>            
+            <span class='cell' name='name'> {{ data.name}}</span>
+            <span class='cell' name='xp'> {{ data.xp }}</span>                
+        </div>
+        {% endfor %}
+    </div>
+
+
+{% endblock content %}        

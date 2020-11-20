@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from .forms import RecordForm
-from .models import Record, Action
+from .models import Record, Action, Quest
 from datetime import date
 import datetime
 from django.db.models import F, Sum, Count, Case, When
@@ -21,37 +21,37 @@ def record(request, username, term):
     else:
         records = None        
         field_names = None
-        xp_per_day = []
+        earned_xp = []
+        spent_xp = []
+        dates = []
+        graph_data = []
+        days = 0
         
         total_xp = Record.objects.query_total_xp(user=user)
  
         actions = Action.objects.all()    
         if term == 'today':
-            #records = Record.objects.filter(user=user, date=date.today()).order_by('-id')
             records = Record.objects.query_all(user=user)
-            #for record in records:
-            #    print(record['category'])
-                #record['category'] = Action.category_type_choices[record['category']][1]
-
             field_names = ["카테고리", "행동", "반복횟수", "경험치", '메모', '날짜', '시간']
         elif term == 'week':
-            records = Record.objects.query_xp_per_action(user=user, days=6)
-            xp_per_day = Record.objects.query_xp_per_day(user=user, days=6)
-            field_names = ["카테고리", "행동", "반복횟수", "경험치"]
+            days = 6
+            field_names = ["카테고리", "행동", "반복횟수", "경험치"]           
         elif term == 'month':
-            records = Record.objects.query_xp_per_action(user=user, days=29)
-            xp_per_day = Record.objects.query_xp_per_day(user=user, days=29)
+            days = 29
             field_names = ["카테고리", "행동", "반복횟수", "경험치"]
         else:          
             term = 'total'
-            records = Record.objects.query_xp_per_action(user=user, days=364)
-            xp_per_day = Record.objects.query_xp_per_day(user=user, days=364)
+            days = 364
             field_names = ["카테고리", "행동", "반복횟수", "경험치"]
-            
+
+        if term != 'today':    
+            records = Record.objects.query_xp_per_action(user=user, days=days)
+            earned_xp = Record.objects.query_xp_per_day(user=user, days=days)
+            spent_xp = Record.objects.query_xp_for_game(user=user, days=days)
+
 
         form = RecordForm()
         form.fields['user'].initial = user
-
 
         return render(
             request, 
@@ -59,7 +59,7 @@ def record(request, username, term):
             {
                 'page_name': 'record',
                 'username': username,
-                'total_xp': total_xp, 
+                'total_xp': total_xp, # 누적 총 xp
                 'form': form, 
                 'data_list': records,
                 'field_names': field_names,
@@ -70,7 +70,8 @@ def record(request, username, term):
                     {'id':'total', 'name': "전체"}
                 ],
                 'selected_tab': term,
-                'xp_per_day': xp_per_day               
+                'earned_xp': earned_xp,  # 기간별 벌어들인 xp # 기간별 소비한 xp   
+                'spent_xp': spent_xp        
             }
         )
 
@@ -92,10 +93,16 @@ def show_xpsheets(request):
     
     return render(
         request, 
-        'quest/record.html', 
+        'quest/xpsheets.html', 
         {"page_name": 'xpsheets', 'data_list': data_list, 'field_names': ["카테고리", "행동", "경험치"]}
     )
 
 
-def quest(request):
-    pass
+def quests(request):
+    data_list = Quest.objects.all()
+
+    return render(
+        request, 
+        'quest/quest.html', 
+        {"page_name": 'xpsheets', 'data_list': data_list, 'field_names': ["카테고리", "퀘스트이름", "경험치", "수행자", "수행 여부"]}
+    )
