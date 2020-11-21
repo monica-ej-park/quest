@@ -14,7 +14,7 @@
         </div>
         {% for data in data_list %}  
         <div class="row">            
-            <span class='cell' name='category'>{{ data.category }}</span>            
+            <span class='cell' name='category'>{{ data.get_category_display }}</span>            
             <span class='cell' name='name'> {{ data.name}}</span>
             <span class='cell' name='xp'> {{ data.xp }}</span>                
         </div>

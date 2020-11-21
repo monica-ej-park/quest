@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from .forms import RecordForm
+from .forms import RecordForm, QuestForm
 from .models import Record, Action, Quest
 from datetime import date
 import datetime
@@ -26,13 +26,11 @@ def record(request, username, term):
         dates = []
         graph_data = []
         days = 0
-        
-        total_xp = Record.objects.query_total_xp(user=user)
  
         actions = Action.objects.all()    
         if term == 'today':
             records = Record.objects.query_all(user=user)
-            field_names = ["카테고리", "행동", "반복횟수", "경험치", '메모', '날짜', '시간']
+            field_names = ["카테고리", "행동", "반복횟수", "경험치", '날짜', '시간', '확인']
         elif term == 'week':
             days = 6
             field_names = ["카테고리", "행동", "반복횟수", "경험치"]           
@@ -59,7 +57,9 @@ def record(request, username, term):
             {
                 'page_name': 'record',
                 'username': username,
-                'total_xp': total_xp, # 누적 총 xp
+                'total_xp': Record.objects.query_total_xp(user=user), # 누적 총 xp
+                'unchecked_xp': Record.objects.query_unchecked_xp(user=user),
+                'unchecked_spent_xp': Record.objects.query_unchecked_spent_xp(user=user),
                 'form': form, 
                 'data_list': records,
                 'field_names': field_names,
@@ -83,14 +83,9 @@ def record_kjh(request, username):
     return record(request=request, username=username, term='today')
 
 
-def record_today(request):
-    pass
-
 def show_xpsheets(request):
     data_list = Action.objects.all()
-    for data in data_list:
-        data.category = data.category_type_choices[data.category][1]
-    
+
     return render(
         request, 
         'quest/xpsheets.html', 
@@ -99,10 +94,19 @@ def show_xpsheets(request):
 
 
 def quests(request):
-    data_list = Quest.objects.all()
-
+    data_list = Quest.objects.all()#filter(accomplishment=False)
     return render(
         request, 
         'quest/quest.html', 
-        {"page_name": 'xpsheets', 'data_list': data_list, 'field_names': ["카테고리", "퀘스트이름", "경험치", "수행자", "수행 여부"]}
+        {
+            "page_name": 'quests', 
+            'data_list': data_list, 
+            'field_names': ["카테고리", "퀘스트이름", "경험치", "수행자", ""]
+        }
     )
+
+def quests_accomplish(request, data_id):
+    q = Quest.objects.get(id=data_id)
+    q.accomplishment = True
+    q.save()
+    return quests(request)

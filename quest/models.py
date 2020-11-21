@@ -3,8 +3,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 import datetime
 from datetime import date
-from django.db.models import F, Sum, Count, Case, When, Subquery
-
+from django.db.models import F, Sum, Count, Case, When, Subquery, Value
+from django.db.models.functions import Concat
 
 class Action(models.Model):
     category_type_choices = (
@@ -36,8 +36,8 @@ class RecordManager(models.Manager):
         ).annotate(
             category=F('action__category')
         ).order_by('-id')
-        for record in records:
-            record.category = Action.category_type_choices[record.category][1]
+#        for record in records:
+#            record.category = Action.category_type_choices[record.category][1]
         return records
 
 
@@ -45,17 +45,35 @@ class RecordManager(models.Manager):
     def query_total_xp(self, user):
         return Record.objects.filter(
             user=user,
+            checked=True
         ).aggregate(Sum('xp'))['xp__sum'] 
-        
+
+    # 미확인 xp (게임제외)
+    def query_unchecked_xp(self, user):
+        return Record.objects.filter(
+            user=user,
+            checked=False
+        ).exclude(
+            action__category=5
+        ).aggregate(Sum('xp'))['xp__sum']    
+
+    # 미확인 게임 xp (삭감 예정)
+    def query_unchecked_spent_xp(self, user):
+        return Record.objects.filter(
+            user=user,
+            checked=False,
+            action__category=5
+        ).aggregate(Sum('xp'))['xp__sum']   
+
 
     # 기간내 액션별 총 xp
     def query_xp_per_action(self, user, days):
         records = Record.objects.filter(
             user=user, 
-            date__range=[date.today() - datetime.timedelta(days=days), 
-            date.today()]
+            date__range=[date.today() - datetime.timedelta(days=days), date.today()],
+            checked=True
         ).values(
-            'action'
+            'action'#, 'action__category'
         ).annotate(
             category=F('action__category'),
             name=F('action__name'),
@@ -71,8 +89,8 @@ class RecordManager(models.Manager):
     def query_xp_per_day(self, user, days):
         return Record.objects.filter(
             user=user, 
-            date__range=[date.today() - datetime.timedelta(days=days), 
-            date.today()]
+            date__range=[date.today() - datetime.timedelta(days=days), date.today()],
+            checked=True
         ).exclude(
             action__category=5
         ).values(
@@ -87,8 +105,8 @@ class RecordManager(models.Manager):
         return Record.objects.filter(
             user=user,
             action__category=5, # 게임 == 5
-            date__range=[date.today() - datetime.timedelta(days=days), 
-            date.today()]
+            date__range=[date.today() - datetime.timedelta(days=days), date.today()],
+            checked=True
         ).values(
             'date'
         ).annotate(
@@ -96,6 +114,7 @@ class RecordManager(models.Manager):
         )#.order_by(
         #    '-date'
         #)
+
 
 
 class Record(models.Model):
@@ -106,6 +125,7 @@ class Record(models.Model):
     xp = models.IntegerField(default=0, verbose_name="경험치")
     date = models.DateField(verbose_name="날짜", default=datetime.date.today, auto_created=True)
     time = models.TimeField(verbose_name="시간", default=timezone.now, auto_created=True)
+    checked = models.BooleanField(verbose_name="확인", default=False)
 
     objects = RecordManager()
 

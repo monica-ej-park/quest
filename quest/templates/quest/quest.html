@@ -13,16 +13,23 @@
     {% endfor %}   
     </div>
     {% for data in data_list %}  
-    <div class="row">            
-        <span class='cell' name='category'>{{ data.category }}</span>            
-        <span class='cell' name='name'>{{ data.name}}</span>
+    <div class="row"> 
+        {% if accomplishment %}
+        <span class='cell'><h2>{{ data.name}}를 끝냈어!</h2><h2>{{data.xp}}를 얻었어!</h2></span>        
+        {% else %}           
+        <span class='cell' name='category'>{{ data.get_category_display }}</span>            
+        <span class='cell' name='name'>
+            <p><h5>{{ data.name}}</h5></p>
+            <p>{{ data.desc }}</p>
+        </span>
         <span class='cell' name='xp'>{{ data.xp }}</span> 
         <span class='cell' name='to'>{{ data.to }}</span> 
-        <span class='cell' name='accomplishment'>{{ data.accomplishment }}</span>                      
+        <span class='cell' name='accomplishment'>
+            <a href="{% url 'quests_accomplish' data.id %}" class="btn btn-outline-info" role="button">경험치받기</a>
+        </span>   
+        {% endif %}                   
     </div>
-    <div class="row">
-        <span class='cell' name='desc'>{{ data.desc }}</span>
-    </div>
+
     {% endfor %}
 </div>
 

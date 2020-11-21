@@ -1,5 +1,5 @@
 from django.forms import *
-from quest.models import Record, Action
+from quest.models import Record, Action, Quest
 from django.contrib.auth.models import User
 
 class RecordForm(ModelForm):
@@ -21,3 +21,10 @@ class RecordForm(ModelForm):
             field = self.fields.get(field_name)
             field.widget.attrs.update({'placeholder': field.label})
             field.label = ''
+
+
+
+class QuestForm(ModelForm):
+    class Meta:
+        model = Quest
+        fields = ('accomplishment',)

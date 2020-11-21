@@ -14,11 +14,11 @@
 
     <div class="blank">
         <br/>
-        <H4>저장된 <b>{{ username }}</b> 기록 (현재 경험치: {{ total_xp }}xp)</H4>
+        <H5>저장된 <b>{{ username }}</b> 기록 (현재 경험치: {{ total_xp | default:"0" }}xp | 미확인 경험치: + {{ unchecked_xp | default:"0" }}xp | {{ unchecked_spent_xp | default:"-0"}}xp)</H5>
     </div>
 
 
-    <div class="btn-group btn-lg btn-block" role="group" aria-label="Basic example">
+    <div class="btn-group btn-sm btn-block" role="group" aria-label="Basic example">
         {% for tab in record_tabs %}
             {% if selected_tab == tab.id %}
                 <button 
@@ -52,18 +52,22 @@
           {% for data in data_list %}  
         <div class="row">     
             {% if selected_tab == 'today' %}              
-                <span class='cell' name='desc'> {{ data.category }}</span>
-                <span class='cell' name='desc'> {{ data.action.name }}</span>
-                <span class='cell' name='desc'> {{ data.repeat }}</span>
-                <span class='cell' name='desc'> {{ data.xp }}</span>   
-                <span class='cell' name='desc'> {{ data.memo }}</span>
-                <span class='cell' name='desc'> {{ data.date }}</span>
-                <span class='cell' name='desc'> {{ data.time }}</span>
+                <span class='cell' name='desc'>{{ data.action.get_category_display }}</span>
+                <span class='cell' name='desc'>
+                    <p>{{ data.action.name }}</p>
+                    <p>{{ data.memo }}</p>
+                </span>
+                <span class='cell' name='desc'>{{ data.repeat }}</span>
+                <span class='cell' name='desc'>{{ data.xp }}</span>   
+                <span class='cell' name='desc'>{{ data.date | date:"yy/m/d" }}</span>
+                <span class='cell' name='desc'>{{ data.time | time:"H:i" }}</span>
+                <span class='cell' name='desc'>{% if data.checked %} 확인 {% else %} 미확인 {% endif %}</span>
+                
             {% else %}
-                <span class='cell' name='desc'> {{ data.category }}</span>
-                <span class='cell' name='desc'> {{ data.name }}</span>
-                <span class='cell' name='desc'> {{ data.total_repeat }}</span>
-                <span class='cell' name='desc'> {{ data.total_xp }}</span>
+                <span class='cell' name='desc'>{{ data.category }}</span>
+                <span class='cell' name='desc'>{{ data.name }}</span>
+                <span class='cell' name='desc'>{{ data.total_repeat }}</span>
+                <span class='cell' name='desc'>{{ data.total_xp }}</span>
             {% endif %}
                  <!--<span class='edit_cell'><button name='edit_btn' class='edit_btn'>수정</button></span>-->        
         </div>
@@ -76,13 +80,11 @@
           <br/>
     {% if selected_tab != 'today' %}           
     <div>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> 
-    
         <!-- 차트 링크 --> 
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script> 
         
         <div class="container" > 
-            <canvas id="myChart" width = 850px></canvas> 
+            <canvas id="myChart" width='850px'></canvas> 
         </div>
         
         <!-- 부트스트랩 --> 
