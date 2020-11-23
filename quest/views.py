@@ -101,7 +101,7 @@ def quests(request):
         {
             "page_name": 'quests', 
             'data_list': data_list, 
-            'field_names': ["카테고리", "퀘스트이름", "경험치", "수행자", ""]
+            'field_names': ["카테고리", "퀘스트", "수행자", ""]
         }
     )
 
@@ -109,4 +109,5 @@ def quests_accomplish(request, data_id):
     q = Quest.objects.get(id=data_id)
     q.accomplishment = True
     q.save()
+    #Record.objects.create(user=q.to, action=q.)
     return quests(request)

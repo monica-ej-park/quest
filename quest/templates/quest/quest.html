@@ -4,33 +4,52 @@
 <br/>
 <h2>퀘스트</h2>
 <br/>
-<div class="table">
-    <div class='header_row'>
-    {% for field_name in field_names %}
-    <span class='header_cell'>
-        {{ field_name }}
-    </span>
-    {% endfor %}   
-    </div>
-    {% for data in data_list %}  
-    <div class="row"> 
-        {% if accomplishment %}
-        <span class='cell'><h2>{{ data.name}}를 끝냈어!</h2><h2>{{data.xp}}를 얻었어!</h2></span>        
-        {% else %}           
-        <span class='cell' name='category'>{{ data.get_category_display }}</span>            
-        <span class='cell' name='name'>
-            <p><h5>{{ data.name}}</h5></p>
-            <p>{{ data.desc }}</p>
-        </span>
-        <span class='cell' name='xp'>{{ data.xp }}</span> 
-        <span class='cell' name='to'>{{ data.to }}</span> 
-        <span class='cell' name='accomplishment'>
-            <a href="{% url 'quests_accomplish' data.id %}" class="btn btn-outline-info" role="button">경험치받기</a>
-        </span>   
-        {% endif %}                   
-    </div>
+<div class="container">
+    <div class='row'>
+        {% for field_name in field_names %}
+        {% if field_name == "퀘스트" %}
+        <div class='col-md-6'>
+        {% elif field_name == "" %}
+        <div class='col-md-2'>
+        {% else %}
+        <div class='col-md-2'>
+        {% endif %}
+            <b>{{ field_name }}</b>
+        </div>
+        {% endfor %}   
+    </div>    
+    {% for data in data_list %} 
+
+        <div class="row">  
+            <div class='col-md-2' name='category'>
+                {{ data.get_category_display }}
+            </div>            
+            <div class='col-md-6' name='name'>
+                <p><h5>{{ data.name}}</h5></p>
+                <p>{{ data.desc }}</p>
+            </div>
+            <div class='col-md-2' name='to'>
+                {{ data.to }}
+            </div> 
+            <div class='col-md-2' name='accomplishment'>
+                {% if data.accomplishment %}
+                    <button type="button" class="btn btn-outline-info" role="button" disabled><p>{{ data.xp }}xp</p> <p>획득 완료</p></a>
+                {% else %}
+                    <a href="{% url 'quests_accomplish' data.id %}" class="btn btn-outline-info" role="button"><p>{{ data.xp }}xp</p> <p> 경험치 받기 </p></a>
+                {% endif %}
+            </div> 
+        </div>
+     
 
     {% endfor %}
 </div>
+
+<style>
+    .col-md-2, .col-md-6, .col-md-10 {
+        padding: 3px; 
+        border-bottom: 1px solid #DDD; 
+    }
+
+</style>
 
 {% endblock content %}
