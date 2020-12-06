@@ -111,3 +111,16 @@ def quests_accomplish(request, data_id):
     q.save()
     #Record.objects.create(user=q.to, action=q.)
     return quests(request)
+
+
+def check(request):
+    records = Record.objects.filter(checked=False)
+    return render(
+        request, 
+        'quest/check.html', 
+        {
+            "page_name": 'check', 
+            'data_list': records, 
+            'field_names': ["수행자", "행동", "반복횟수", "경험치", "모두선택"]
+        }
+    )

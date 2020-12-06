@@ -1,0 +1,68 @@
+
+{% extends 'quest/base.html' %}
+
+{% block content %}
+<br/>
+<h2>미확인 목록</h2>
+<br/>
+<!--["수행자", "행동", "반복횟수", "경험치", "날짜", "확인"]-->
+<form>
+<div class="container">
+    <div class='row'>
+        {% for field_name in field_names %}
+        {% if field_name == "행동" %}
+        <div class='col-md-6'>
+        {% elif field_name == "반복횟수" or field_name == "경험치" %}
+        <div class='col-md-1'>
+        {% else %}
+        <div class='col-md-2'>
+        {% endif %}
+            {% if field_name == "모두선택" %}
+            <input type="checkbox" class="form-check-input" id="check">
+            <label class="form-check-label" for="check"><b>모두선택</b></label>
+            {% else %}
+            <b>{{ field_name }}</b>
+            {% endif %}
+        </div>
+        {% endfor %}   
+    </div>    
+    {% for data in data_list %} 
+
+        <div class="row">  
+            <div class='col-md-2' name='user'>
+                <p>{{ data.user }}</p>
+                <p>{{ data.date }}</p>
+            </div>            
+            <div class='col-md-6' name='action'>
+                <p><h5>{{ data.action}}</h5></p>
+                <p>{{ data.memo }}</p>
+            </div>
+            <div class='col-md-1' name='repeat'>
+                {{ data.repeat}}
+            </div> 
+            <div class='col-md-1' name='xp'>
+                {{ data.xp}}
+            </div> 
+            <div class='col-md-2' name='checked'>
+                <input type="checkbox" class="form-check-input" id="check">
+                <label class="form-check-label" for="check">확인</label>
+            </div> 
+        </div>
+    {% endfor %}
+</div>
+<button type="submit" class="btn btn-primary">확인</button>
+</form>
+
+
+<style>
+    .col-md-1, .col-md-2, .col-md-6, .col-md-10 {
+        padding: 3px; 
+        border-bottom: 1px solid #DDD; 
+    }
+
+</style>
+
+{% endblock content %}
+
+
+
