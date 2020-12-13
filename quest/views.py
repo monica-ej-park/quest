@@ -7,7 +7,7 @@ import datetime
 from django.db.models import F, Sum, Count, Case, When
 # Create your views here.
 
-def record(request, username, term):
+def record(request, username, term='today'):
     user = User.objects.get(username=username)
     if request.method == "POST":
         form = RecordForm(request.POST)
@@ -46,7 +46,7 @@ def record(request, username, term):
             records = Record.objects.query_xp_per_action(user=user, days=days)
             earned_xp = Record.objects.query_xp_per_day(user=user, days=days)
             spent_xp = Record.objects.query_xp_for_game(user=user, days=days)
-
+            print("spent_xp =", spent_xp)
 
         form = RecordForm()
         form.fields['user'].initial = user
@@ -74,13 +74,6 @@ def record(request, username, term):
                 'spent_xp': spent_xp        
             }
         )
-
-
-def record_kjy(request, username):
-    return record(request=request, username=username, term='today')
-
-def record_kjh(request, username):
-    return record(request=request, username=username, term='today')
 
 
 def show_xpsheets(request):
