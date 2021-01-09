@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
+from account.models import User
 from .forms import RecordForm, QuestForm
 from .models import Record, Action, Quest
 from datetime import date
 import datetime
 from django.db.models import F, Sum, Count, Case, When
+
 # Create your views here.
 
 def record(request, username, term='today'):
@@ -117,3 +119,5 @@ def check(request):
             'field_names': ["수행자", "행동", "반복횟수", "경험치", "모두선택"]
         }
     )
+
+

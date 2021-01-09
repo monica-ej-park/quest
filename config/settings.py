@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+#from django.urls import reverse_lazy
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -47,6 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'import_export',
     'quest',
+    'account',
+
 ]
 
 MIDDLEWARE = [
@@ -129,3 +132,18 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+
+#LOGIN_REDIRECT_URL = reverse('quest')
+#LOGOUT_REDIRECT_URL = reverse_lazy('account:login')
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'OPTION': {'user_attributes': ('email', 'name')}, 
+        #forms.py에서 email과 name만 지정했기 때문에
+    },
+]
+
+
+AUTH_USER_MODEL = 'account.User'        # '앱label.모델명'

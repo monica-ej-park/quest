@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
+from account.models import User
 import datetime
 from datetime import date
 from django.db.models import F, Sum, Count, Case, When, Subquery, Value
@@ -23,7 +24,6 @@ class Action(models.Model):
     category = models.IntegerField(default=0, choices=category_type_choices, verbose_name="카테고리")
     name = models.CharField(null=False, max_length=100, verbose_name="행동이름")
     xp = models.IntegerField(default=0, verbose_name="경험치")
-
 
     def __str__(self):
         return f'{self.category_type_choices[self.category][1]}  |  {self.name}  |  {self.xp}'
